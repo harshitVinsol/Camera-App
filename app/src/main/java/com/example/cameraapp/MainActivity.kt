@@ -2,32 +2,26 @@ package com.example.cameraapp
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
-import android.graphics.ImageFormat
-import android.graphics.Matrix
-import android.graphics.SurfaceTexture
-import android.hardware.Camera
-import android.hardware.camera2.*
-import android.media.ImageReader
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Environment
-import android.provider.Settings
 import android.util.Log
 import android.util.Size
-import android.view.*
+import android.view.TextureView
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.isInvisible
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
+import java.lang.Exception
 import java.util.concurrent.Executors
 
 private const val REQUEST_CODE_PERMISSIONS = 10
@@ -101,25 +95,54 @@ class MainActivity : AppCompatActivity() {
                         exc: Throwable?
                     ) {
                         val msg = "Photo capture failed: $message"
-                        Log.e("Camera App", msg, exc)
+
                         viewFinder.post {
-                            Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+                            val snack = Snackbar.make(it,msg,Snackbar.LENGTH_LONG)
+                            snack.show()
                         }
                     }
 
                     override fun onImageSaved(file: File) {
-                        val msg = "Photo capture succeeded: ${file.absolutePath}"
-                        Log.d("Camera App", msg)
+                        val photoPath = file.absolutePath
+                        val msg = "Photo capture succeeded"
+
                         viewFinder.post {
-                            Toast.makeText(baseContext, msg, Toast.LENGTH_LONG).show()
+                            val snack = Snackbar.make(it,msg,Snackbar.LENGTH_LONG)
+                                .setAction("OPEN"
+                                ){
+                                    val uri = Uri.fromFile(File(photoPath))
+                                    showImage()
+                                    imageView.setImageURI(uri)
+                                }
+                            snack.show()
                         }
                     }
                 })
         }
-        // Bind use cases to lifecycle
         CameraX.bindToLifecycle(this, preview, imageCapture)
-    }
 
+        close_button.setOnClickListener {
+            closeImage()
+        }
+    }
+    /*
+    A function to show ImageView and Close Button
+     */
+    private fun showImage(){
+        textureView.isInvisible = true
+        imageView.isInvisible = false
+        capture.isInvisible = true
+        close_button.isInvisible = false
+    }
+    /*
+    A function to show Preview and Capture Button
+     */
+    private fun closeImage(){
+        textureView.isInvisible = false
+        imageView.isInvisible = true
+        capture.isInvisible = false
+        close_button.isInvisible = true
+    }
     /*
      Process result from permission request dialog box, has the request been granted? If yes, start Camera. Otherwise display a toast
      */
