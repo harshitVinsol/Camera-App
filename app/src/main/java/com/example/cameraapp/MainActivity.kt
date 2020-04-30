@@ -34,7 +34,6 @@ MainActivity to display the Camera Preview with a simple button to capture the i
  */
 class MainActivity : AppCompatActivity() {
     private val executor = Executors.newSingleThreadExecutor()
-    private lateinit var viewFinder: TextureView
 
     @SuppressLint("SourceLockedOrientationActivity")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,11 +41,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        viewFinder = findViewById(R.id.textureView)
 
         // Request camera permissions
         if (allPermissionsGranted()) {
-            viewFinder.post {
+            textureView.post {
                 startCamera()
             }
         } else {
@@ -59,7 +57,7 @@ class MainActivity : AppCompatActivity() {
      */
     private fun startCamera() {
         val previewConfig = PreviewConfig.Builder().apply {
-            setTargetResolution(Size(viewFinder.width, viewFinder.height))
+            setTargetResolution(Size(textureView.width, textureView.height))
         }.build()
 
         // Build the viewfinder use case
@@ -69,11 +67,11 @@ class MainActivity : AppCompatActivity() {
         preview.setOnPreviewOutputUpdateListener {
 
             // To update the SurfaceTexture, we have to remove it and re-add it
-            val parent = viewFinder.parent as ViewGroup
-            parent.removeView(viewFinder)
-            parent.addView(viewFinder, 0)
+            val parent = textureView.parent as ViewGroup
+            parent.removeView(textureView)
+            parent.addView(textureView, 0)
 
-            viewFinder.surfaceTexture = it.surfaceTexture
+            textureView.surfaceTexture = it.surfaceTexture
         }
         // Create configuration object for the image capture use case
         val imageCaptureConfig = ImageCaptureConfig.Builder()
@@ -96,7 +94,7 @@ class MainActivity : AppCompatActivity() {
                     ) {
                         val msg = "Photo capture failed: $message"
 
-                        viewFinder.post {
+                        textureView.post {
                             val snack = Snackbar.make(it,msg,Snackbar.LENGTH_LONG)
                             snack.show()
                         }
@@ -106,7 +104,7 @@ class MainActivity : AppCompatActivity() {
                         val photoPath = file.absolutePath
                         val msg = "Photo capture succeeded"
 
-                        viewFinder.post {
+                        textureView.post {
                             val snack = Snackbar.make(it,msg,Snackbar.LENGTH_LONG)
                                 .setAction("OPEN"
                                 ){
@@ -150,14 +148,15 @@ class MainActivity : AppCompatActivity() {
         requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
             if (allPermissionsGranted()) {
-                viewFinder.post { startCamera() }
+                textureView.post {
+                    startCamera()
+                }
             } else {
                 Toast.makeText(this, "Permissions not granted by the user.", Toast.LENGTH_SHORT).show()
                 finish()
             }
         }
     }
-
     /*
      Check if all permission specified in the manifest have been granted
      */
