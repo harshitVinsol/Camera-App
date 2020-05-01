@@ -2,14 +2,11 @@ package com.example.cameraapp
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.util.Size
-import android.view.TextureView
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
@@ -21,18 +18,19 @@ import androidx.core.view.isInvisible
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
-import java.lang.Exception
 import java.util.concurrent.Executors
 
-private const val REQUEST_CODE_PERMISSIONS = 10
-/*
-This is an array of all the permission specified in the manifest.
- */
-private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
 /*
 MainActivity to display the Camera Preview with a simple button to capture the image
  */
 class MainActivity : AppCompatActivity() {
+    companion object{
+        private const val REQUEST_CODE_PERMISSIONS = 10
+        /*
+        This is an array of all the permission specified in the manifest.
+         */
+        private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    }
     private val executor = Executors.newSingleThreadExecutor()
 
     @SuppressLint("SourceLockedOrientationActivity")
